@@ -17,12 +17,18 @@ Template.topicVoting.helpers({
   myVotes: function() {
     var mtg = Meeting.current();
     var userId = Meteor.userId();
+    if (!userId) {
+      return 0;
+    }
     var topicId = this._id;
     return Meeting.getUserVotesOnTopic(mtg, userId, topicId);
   },
   votes: function() {
     var mtg = Meeting.current();
     var userId = Meteor.userId();
+    if (!userId) {
+      return null;
+    }
     var topicId = this._id;
     var votesCast = Meeting.getUserVotesOnTopic(mtg, userId, topicId);
     var votesAllowed = Meeting.getUserVotesAllowed(mtg, userId);
@@ -39,6 +45,9 @@ Template.topicVoting.helpers({
     return votes;
   },
   isVoting: function() {
+    if (!Meteor.userId()) {
+      return false;
+    }
     return (Session.get('votingOnTopic') == this._id);
   },
   canVoteOnTopic: function() {
@@ -47,6 +56,9 @@ Template.topicVoting.helpers({
       return false;
     }
     var userId = Meteor.userId();
+    if (!userId) {
+      return false;
+    }
     var topicId = this._id;
     var votesCast = Meeting.getUserVotesOnTopic(mtg, userId, topicId);
     var votesAllowed = Meeting.getUserVotesAllowed(mtg, userId);

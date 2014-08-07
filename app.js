@@ -5,7 +5,24 @@ Router.configure({
   notFoundTemplate: 'notFound'
 });
 Router.map(function() {
-  this.route('home', {path: '/'});
+  this.route('home', {
+    path: '/',
+    waitOn: function() {
+      return Meteor.subscribe('public');
+    },
+    data: function() {
+      return {
+        topics: Topic.find(
+          {},
+          { sort: {
+            votesCurrent: -1,
+            votesLife: -1,
+            created: -1,
+          } }
+        )
+      };
+    }
+  });
 
   this.route('topics', {
     waitOn: function() {

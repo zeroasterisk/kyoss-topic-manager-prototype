@@ -30,11 +30,13 @@
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav">
-          <li><a href="{{pathFor 'about'}}">About</a></li>
           <li><a href="{{pathFor 'topics'}}">Topics</a></li>
           <li>{{> currentMeeting noStart="true"}}</li>
-          <li><a href="{{pathFor 'meetings'}}">Meetings</a></li>
-          <li><a href="{{pathFor 'profile'}}">Profile</a></li>
+          <!--<li><a href="{{pathFor 'meetings'}}">Meetings</a></li>-->
+          {{#if currentUser}}
+            <li><a href="{{pathFor 'profile'}}">Profile</a></li>
+          {{/if}}
+          <li><a href="{{pathFor 'about'}}">About</a></li>
         </ul>
         <div class="navbar-right">
           {{> loginButtons}}
