@@ -6,7 +6,6 @@
  *
  * We are attaching a Schema to the Meteor.users Collection
  *
- */
 Schema = {};
 
 Schema.UserCountry = new SimpleSchema({
@@ -104,3 +103,4 @@ Schema.User = new SimpleSchema({
 });
 
 Meteor.users.attachSchema(Schema.User);
+*/
