@@ -1,0 +1,26 @@
+<template name="meeting">
+
+<ol class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li><a href="{{pathFor 'meetings'}}">Meetings</a></li>
+  <li class="active">
+    {{> currentMeeting}}
+  </li>
+</ol>
+
+<div class="well">
+  <dl class="dl-horizontal">
+    <dt>Your Votes Spent</dt>
+    <dd>{{votesSpent}}</dd>
+    {{#if isVoteable}}
+      <dt>Your Votes Left</dt>
+      <dd>{{votesLeft}}</dd>
+    {{/if}}
+  </dl>
+</div>
+
+{{#each topics}}
+  {{> topicRow}}
+{{/each}}
+
+</template>

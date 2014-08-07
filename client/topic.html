@@ -1,0 +1,73 @@
+<template name="topic">
+
+<ol class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li><a href="/topics">Topics</a></li>
+  <li class="active">{{name}}</li>
+</ol>
+
+<h2>{{name}}</h2>
+<div class="btn-toolbar" role="toolbar">
+
+  {{> topicVoting}}
+
+  <div class="btn-group">
+    {{#if url}}
+      <a href="{{url}}" class="btn btn-default">
+        <span class="glyphicon glyphicon-globe"></span>
+        Link
+      </a>
+    {{/if}}
+    {{#if canEdit}}
+      <a href="{{pathFor 'topicEdit'}}" class="btn btn-default">
+        <span class="glyphicon glyphicon-edit"></span>
+        Edit
+      </a>
+    {{/if}}
+  </div>
+
+</div>
+
+<div class="row">
+  <div class="col-sm-8">
+
+    <p class="lead">{{short}}</p>
+
+    {{#if tags}}
+      <p class="alert alert-info">
+        {{tags}}
+      </p>
+    {{/if}}
+
+  </div>
+  <div class="col-sm-4">
+    <div class="list-group">
+      {{#each topicVoteHistory}}
+        {{#if start}}
+          <a class="list-group-item" href="{{pathFor 'meeting'}}">
+            {{name}}
+            <br>
+            <span class="label label-{{class}}">
+              {{start}}
+            </span>
+            <span class="badge">{{votes}}</span>
+          </a>
+        {{else}}
+          <a class="list-group-item" href="#">
+            <span class="label label-{{class}}">
+              {{name}}
+            </span>
+            <span class="badge">{{votes}}</span>
+          </a>
+        {{/if}}
+      {{/each}}
+    </div>
+  </div>
+</div>
+
+{{#markdown}}
+<div class="muted">{{desc}}</div>
+{{/markdown}}
+
+
+</template>

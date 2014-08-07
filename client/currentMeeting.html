@@ -1,0 +1,10 @@
+<template name="currentMeeting">
+{{#with get}}
+<a href="{{pathFor 'meeting'}}">
+  {{name}}
+  {{#if start}}
+    <small class="muted">{{start}}</small>
+  {{/if}}
+</a>
+{{/with}}
+</template>

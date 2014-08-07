@@ -1,0 +1,26 @@
+<template name="topicEdit">
+
+{{#with topic}}
+<ol class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li><a href="/topics">Topics</a></li>
+  <li><a href="{{pathFor 'topic'}}">{{name}}</a></li>
+  <li class="active">Edit Topic</li>
+</ol>
+{{/with}}
+
+{{> quickForm
+  id="updateTopicForm"
+  _id="updateTopicForm"
+  collection="Topic"
+  doc=topic
+  type="update"
+  template="bootstrap3-horizontal"
+  label-class="col-sm-3" input-col-class="col-sm-9"
+  omitFields="owner,created,modified,locked,votesLife,votesOld,votes"
+  validation="keyup"
+}}
+
+
+</template>
+

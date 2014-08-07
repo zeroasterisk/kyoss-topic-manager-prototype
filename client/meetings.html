@@ -1,0 +1,21 @@
+<template name="meetings">
+
+{{#each meetings}}
+  <div class="meeting">
+    <h4 style="margin:0;">
+      <a href="{{pathFor 'meeting'}}">
+        {{name}}
+        {{#if startNice}}
+          <small class="muted">({{startNice}})</small>
+        {{/if}}
+      </a>
+      {{#if location}}
+        <br>
+        <small class="muted">({{location}})</small>
+      {{/if}}
+    </h4>
+  </div>
+  <hr>
+{{/each}}
+
+</template>

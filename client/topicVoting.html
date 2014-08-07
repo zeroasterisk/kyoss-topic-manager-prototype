@@ -1,0 +1,26 @@
+<template name="topicVoting">
+  <div class="btn-group">
+    <a href="#" class="btn btn-info disabled">Votes {{votesLife}}</a>
+    {{#if isVoting}}
+      {{#each votes}}
+        <a href="#" class="btn btn-{{class}} votingCast" data-id="{{topicId}}" data-vote="{{count}}">{{count}}</a>
+      {{/each}}
+      <a href="#" class="btn btn-warning votingEnd">
+        <span class="glyphicon glyphicon-remove"></span>
+        Cancel
+      </a>
+    {{else}}
+      <a href="#" class="btn btn-success disabled">Current {{votesCurrent}}</a>
+      {{#if myVotes}}
+        <a href="#" class="btn btn-warning disabled">Mine {{myVotes}}</a>
+      {{/if}}
+      {{#if canVoteOnTopic}}
+        {{#if myVotes}}
+          <a href="#" class="btn btn-primary votingStart" data-id="{{_id}}">Change</a>
+        {{else}}
+          <a href="#" class="btn btn-primary votingStart" data-id="{{_id}}">Cast Vote</a>
+        {{/if}}
+      {{/if}}
+    {{/if}}
+  </div>
+</template>

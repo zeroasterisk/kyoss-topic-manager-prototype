@@ -1,0 +1,26 @@
+<template name="topics">
+
+<ol class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li class="active">Topics</li>
+</ol>
+
+<div class="row">
+  <div class="col-sm-8">
+    <h1>Topics</h1>
+  </div>
+  <div class="col-sm-4">
+    <a href="{{pathFor 'topicNew'}}" class="btn btn-primary">
+      <span class="glyphicon glyphicon-plus"></span>
+      New Topic
+    </a>
+  </div>
+</div>
+
+
+{{#each topics}}
+  {{> topicRow}}
+{{/each}}
+
+
+</template>

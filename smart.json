@@ -2,6 +2,12 @@
   "packages": {
     "bootstrap3-less": {},
     "iron-router": {},
-    "iron-router-progress": {}
+    "iron-router-progress": {},
+    "moment": {},
+    "accounts-admin-ui-bootstrap-3": {},
+    "collection2": {},
+    "autoform": {},
+    "flash-messages": {},
+    "handlebar-helpers": {}
   }
 }
