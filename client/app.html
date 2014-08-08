@@ -33,16 +33,19 @@
           <li><a href="{{pathFor 'topics'}}">Topics</a></li>
           <li>{{> currentMeeting noStart="true"}}</li>
           <!--<li><a href="{{pathFor 'meetings'}}">Meetings</a></li>-->
-          {{#if currentUser}}
-            <li><a href="{{pathFor 'profile'}}">Profile</a></li>
-          {{/if}}
           <li><a href="{{pathFor 'about'}}">About</a></li>
         </ul>
-        <div class="navbar-right">
+        <ul class="nav navbar-nav navbar-right">
           {{> loginButtons}}
-        </div>
+        </ul>
       </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
   </nav>
 </div>
+</template>
+
+<template name="_loginButtonsAdditionalLoggedInDropdownActions">
+  {{#if currentUser}}
+    <button class="btn btn-default btn-block" id="login-buttons-edit-profile">Profile</button>
+  {{/if}}
 </template>

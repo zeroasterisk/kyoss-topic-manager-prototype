@@ -4,10 +4,10 @@
     "iron-router": {},
     "iron-router-progress": {},
     "moment": {},
-    "accounts-admin-ui-bootstrap-3": {},
     "collection2": {},
     "autoform": {},
     "flash-messages": {},
-    "handlebar-helpers": {}
+    "handlebar-helpers": {},
+    "accounts-ui-bootstrap-3": {}
   }
 }
