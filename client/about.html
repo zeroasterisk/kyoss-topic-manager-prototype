@@ -1,13 +1,16 @@
 <template name="about">
-  <h1>About Kyoss Topics</h1>
+<h1>About Kyoss Topics</h1>
 
-
+<div class="row">
+<div class="col-sm-6">
 {{#markdown}}
-
-This is a prototype of a
-[Topic Selector Project](https://github.com/zeroasterisk/kyoss-topic-manager-prototype.git)
-we plan to use at
+This is a **prototype** for the
+[KYOSS Topic Manager](https://github.com/KYOSS/kyoss-topic-manager)
+which we plan to use at
 [KYOSS](http://kyoss.org/).
+
+The **real** Topic Manager we want to use as a platform for discussing and demonstrating Agile Development practices,
+collaborating with a team, discussing workflow, etc..
 
 The GitHub project for this prototype is here:<br>
 [github.com/zeroasterisk/kyoss-topic-manager-prototype](https://github.com/zeroasterisk/kyoss-topic-manager-prototype.git)
@@ -18,7 +21,21 @@ The Meteor hosted playground url:<br>
 It was written in [MeteorJS](http://meteor.com)
 by [Alan Blount](http://zeroasterisk.com/)
 during a [JsLou](http://jslou.org) *"hack night"*.
-
 {{/markdown}}
+</div>
+<div class="col-sm-6">
+{{#markdown}}
+This **prototype** is functional (for now), and expresses my vision of a basic featurset and basic functionality.
+
+Sadly it is an example of *Cowboy Programming* and probably derails the Agile Development we are attempting to demonstrate.
+
+As such, we need to discuss how this will affect the project going forward and if we are "ok" with this prototype's existance.
+
+1. We can "abandon" it.
+2. We can "adopt" it, and start working on is as the real project.
+3. Or we can "use and reference it" as a playground, to inform our work on the real project (which is how it was intended)
+{{/markdown}}
+</div>
+</div>
 
 </template>
