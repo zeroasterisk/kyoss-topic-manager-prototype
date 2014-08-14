@@ -45,6 +45,9 @@ Topic = new Meteor.Collection('topics', {
       label: "Recent History of Votes {meetingId:votes}",
       optional: true,
       autoValue: function() {
+        if (!this.isSet) {
+          return;
+        }
         if (this.isInsert) {
           return {};
         } else if (this.isUpsert) {
@@ -275,14 +278,16 @@ Meteor.methods({
     if (!_.has(topic, 'votes')) {
       topic.votes = {};
     }
-    if (!_.has(topic.votes, mtg._id)) {
+    if (mtg && !_.has(topic.votes, mtg._id)) {
       topic.votes[mtg._id] = 0;
     }
 
     // get count for current meeting
-    var count = Meeting.getTopicVotes(mtg, topicId);
-    // store into recent history
-    topic.votes[mtg._id] = count;
+    if (mtg) {
+      var count = Meeting.getTopicVotes(mtg, topicId);
+      // store into recent history
+      topic.votes[mtg._id] = count;
+    }
 
     // limit to 6 recent history
     while (_.size(topic.votes) > 6) {
@@ -292,7 +297,7 @@ Meteor.methods({
     }
 
     // grand total
-    // sum on all userIds in: mtg.votes[topicId][userId]
+    // sum on all topic.votes.mtgIds
     var countRecent = _.reduce(topic.votes, function(memo, num) { return memo + num; }, 0);
     var total = countRecent + topic.votesOld;
 
@@ -324,7 +329,8 @@ Meteor.methods({
 Topic.helperVoteHistory  = function(topicId) {
   var topic = Topic.findOne({ _id: topicId });
   if (!topic) {
-    throw new Meteor.Error(404, 'Topic Not Found');
+    console.log('Topic Not Found');
+    return [];
   }
   var mtg = Meeting.current();
 
@@ -334,7 +340,7 @@ Topic.helperVoteHistory  = function(topicId) {
   }
 
   // add current one to the list, if not there
-  if (!_.has(topic.votes, mtg._id)) {
+  if (mtg && !_.has(topic.votes, mtg._id)) {
     topic.votes[mtg._id] = 0;
   }
 
@@ -343,11 +349,14 @@ Topic.helperVoteHistory  = function(topicId) {
 
   _.each(topic.votes, function(value, key, list) {
     var _mtg = Meeting.findOne({ _id: key });
+    if (!_mtg) {
+      return;
+    }
     history.push({
       _id: _mtg._id,
       name: _mtg.name,
       start: moment(_mtg.start).format('MMM Do'),
-      class: (_mtg._id == mtg._id ? "success" : "default"),
+      class: (mtg && _mtg._id == mtg._id ? "success" : "default"),
       votes: value
     });
   });

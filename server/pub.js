@@ -25,10 +25,8 @@ Meteor.publish('public', function () {
         tags: 1,
         locked: 1,
         votesLife: 1,
-        votesCurrent: 1
-        /* not including:
-         *   - votes: too large
-         */
+        votesCurrent: 1,
+        votes: 1
       } }
     )
   ];

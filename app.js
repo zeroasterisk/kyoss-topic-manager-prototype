@@ -106,7 +106,7 @@ Router.map(function() {
 });
 
 if (Meteor.isClient) {
-  Meteor.subscribe('public');
+  SubscriptionPublicHandle = Meteor.subscribe('public');
   Deps.autorun(function () {
     Meteor.subscribe('loggedin', Meteor.userId());
   });

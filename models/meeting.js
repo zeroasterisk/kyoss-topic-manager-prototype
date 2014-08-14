@@ -50,6 +50,9 @@ Meeting = new Meteor.Collection('meetings', {
       optional: true,
       autoValue: function() {
         console.log('autoValue:Meeting:votes', this);
+        if (!this.isSet) {
+          return;
+        }
         if (this.isInsert) {
           return {};
         } else if (this.isUpsert) {
@@ -136,29 +139,28 @@ Meeting.deny({
 // -----------------------------------
 
 // get current Meeting,
-// if one doesn't exist, create it according to rules
 Meeting.current = function() {
   var mtg = Meeting.currentGet();
   if (!mtg) {
-    // no current meeting found...
-    //   attempt to create it on the server (maybe)
-    //   (might not be on client subscribtion yet)
-
-    /* blocking, since no callback */
-    Meteor.call('meetingCurrentCreate');
-
-    // we either just created a new meeting or confirmed it exists...
-    //   (we should get it from the subscribtion now)
-    mtg = Meeting.currentGet();
+    if (!SubscriptionPublicHandle) {
+      var SubscriptionPublicHandle = Meteor.subscribe('public');
+    }
+    if (!SubscriptionPublicHandle.ready()) {
+      console.log('can not get current Meeting... waiting on public subscription');
+      return;
+    }
   }
   if (!mtg) {
-    console.log('current: mtg=', mtg);
-    throw new Meteor.Error(403, "current: unable to get/create a current Meeting");
+    console.log('current: mtg does not exist... ', (SubscriptionPublicHandle.ready() ? '(public ready)' : ''));
+    return {};
+    //throw new Meteor.Error(403, "current: unable to get/create a current Meeting");
   }
+  //console.log('current: mtg=', mtg);
   return mtg;
 };
 
 // get the "next" meeting in the future from yesterday
+//  TODO: any way to make this wait until a subscription is done?
 Meeting.currentGet = function() {
   var yesterday = moment().subtract('days', 1).endOf('day').toDate();
   return Meeting.findOne(
@@ -196,7 +198,13 @@ Meeting.getMtg = function(mtg) {
  * @return object mtg
  */
 Meeting.isVoteable = function(mtg) {
+  if (!Meteor.userId()) {
+    return false;
+  }
   var mtg = Meeting.current();
+  if (!mtg) {
+    return false;
+  }
   return moment(mtg.start).isAfter(moment().endOf('day'));
 }
 
@@ -210,8 +218,7 @@ Meeting.isVoteable = function(mtg) {
 Meeting.getTopicVotes = function(mtg, topicId) {
   var mtg = Meeting.current();
   if (!mtg) {
-    throw new Meteor.Error(404, 'Unable to Find Current Meeting');
-    return false;
+    return 0;
   }
   if (!_.has(mtg, 'votes')) {
     return 0;
@@ -355,6 +362,9 @@ Meteor.methods({
   meetingCurrentCreate: function() {
     // get the MeetingGroup Template for the Meeting
     // TODO: make a MeetingGroup Collection w/ Rules and Defaults
+    if (Meteor.isClient) {
+      return false;
+    }
     var meetingGroup = {
       /* defaults for meeting */
       name: "KYOSS Meeting",
@@ -379,7 +389,7 @@ Meteor.methods({
     if (!last || !last.start) {
       var start = moment().startOf('month');
     } else {
-      var start = moment(last.start).add(25, 'days');
+      var start = moment(last.start).add(2, 'days');
     }
 
     // double-check to ensure we are not starting too far in the future
@@ -403,10 +413,10 @@ Meteor.methods({
 
       // incriment
       start = moment(start).add('day', 1);
-      console.log('currentCreate+1day:', moment(start).format());
+      //console.log('currentCreate+1day:', moment(start).format());
     }
 
-    console.log('currentCreate:result:', moment(start).format());
+    //console.log('currentCreate:result:', moment(start).format());
 
     // double-check to ensure we are not starting too far in the future
     //   start should be less than 2 months in the future
@@ -424,18 +434,31 @@ Meteor.methods({
     data.start = moment(start).toDate();
 
     // does this meeting already exist?
-    var exists = Meeting.findOne(
+    var exists = Meeting.find(
       { start: {
-        $gte: moment(data.start).subtract(1, 'day').toDate(),
-        $lte: moment(data.start).add(1, 'day').toDate()
+        $gte: moment(data.start).subtract(2, 'days').toDate(),
+        $lte: moment(data.start).add(2, 'days').toDate()
       } },
-      { sort: { start: 1 } }
-    );
-    if (!exists || !exists.start) {
+      { sort: { start: -1 } }
+    ).fetch();
+    if (_.isArray(exists) && exists.length > 0 && _.isObject(exists[0]) && _.has(exists[0], '_id')) {
+      console.log('--------------');
+      console.log('--: create called, already exists :--');
+      console.log('--------------');
 
-      // save new Meeting (current)
-      Meeting.insert(data);
+      // temp cleanup, are there more than one?
+      while (exists.length > 1) {
+        var idToDel = exists[ (exists.length - 1) ]._id;
+        delete(exists[ (exists.length - 1) ]);
+        Meeting.remove({ _id: idToDel });
+        console.log('--: deleted duplicate: ' + idToDel + ':--');
+        console.log('--------------');
+      }
+      return true;
     }
+
+    // save new Meeting (current)
+    Meeting.insert(data);
 
     return true;
   },
