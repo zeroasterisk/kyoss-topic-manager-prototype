@@ -8,3 +8,19 @@
 </a>
 {{/with}}
 </template>
+
+<template name="currentMeetingDL">
+<dl class="dl-horizontal">
+  <dt>Current Meeting</dt>
+  <dd>{{> currentMeeting}}</dd>
+  {{#if currentUser}}
+    <dt>Your Votes Spent</dt>
+    <dd>Your {{votesLeft}}</dd>
+    {{#if isVoteable}}
+      <dt>Votes Left</dt>
+      <dd>{{votesLeft}}</dd>
+    {{/if}}
+  {{/if}}
+</dl>
+</template>
+

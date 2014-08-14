@@ -140,7 +140,15 @@ Meeting.deny({
 Meeting.current = function() {
   var mtg = Meeting.currentGet();
   if (!mtg) {
-    Meeting.currentCreate();
+    // no current meeting found...
+    //   attempt to create it on the server (maybe)
+    //   (might not be on client subscribtion yet)
+
+    /* blocking, since no callback */
+    Meteor.call('meetingCurrentCreate');
+
+    // we either just created a new meeting or confirmed it exists...
+    //   (we should get it from the subscribtion now)
     mtg = Meeting.currentGet();
   }
   if (!mtg) {
@@ -152,92 +160,13 @@ Meeting.current = function() {
 
 // get the "next" meeting in the future from yesterday
 Meeting.currentGet = function() {
-  var yesterday = moment().subtract('days', 1).toDate();
+  var yesterday = moment().subtract('days', 1).endOf('day').toDate();
   return Meeting.findOne(
     { start: { $gt: yesterday } },
     { sort: { start: 1 } }
   );
 };
 
-// create the "next" meeting according to rules
-//   NOTE: if we need to customize how often Meetings are created, we will need
-//   to change these rules
-Meeting.currentCreate = function() {
-  // get the MeetingGroup Template for the Meeting
-  // TODO: make a MeetingGroup Collection w/ Rules and Defaults
-  var meetingGroup = {
-    /* defaults for meeting */
-    name: "KYOSS Meeting",
-    short: "Come and join us! We usually have between 15 and 30 Linux users, admins, and programmers show up. Good conversation and networking and, often, a great presentation or two.",
-    location: "LVL1 Hackerspace",
-    locationAddress: "The Pointe in Butchertown, 1205 E Washington Street; Louisville, KY 40206",
-    start: moment(start).toDate(),
-    duration: 120,
-    /* scheudling rules */
-    /* rules: "second Wednesday of the Month" */
-    wom: 2,      /* week of month: 1-5 */
-    dow: 3,      /* day of week: 0=Sun, 6=Sat */
-    todHour: 19, /* time of day: hour in 24hr format */
-    todMin: 00   /* time of day: minutes */
-  };
-
-  // get the last "start"
-  var last = Meeting.findOne(
-    {},
-    { sort: { start: 1 } }
-  );
-  if (!last || !last.start) {
-    var start = moment().startOf('month');
-  } else {
-    var start = moment(last.start);
-  }
-
-  // double-check to ensure we are not starting too far in the future
-  //   start should be either in last month, or in this month
-  if (parseFloat(moment.version) >= 2.7) {
-    start = moment.min(moment(start), moment().endOf('month'));
-  } else {
-    start = moment(start).max(moment().endOf('month'));
-  }
-
-  // incriment days until it matches rules
-  for (var i=0; i<35; i++) {
-    // current:
-    wom = Math.ceil(moment(start).date() / 7);
-    dow = moment(start).weekday();
-
-    // check
-    if (wom == meetingGroup.wom && dow == meetingGroup.dow) {
-      break;
-    }
-
-    // incriment
-    start = moment(start).add('day', 1);
-    console.log('currentCreate+1day:', moment(start).format());
-  }
-
-  console.log('currentCreate:result:', moment(start).format());
-
-  // double-check to ensure we are not starting too far in the future
-  //   start should be less than 2 months in the future
-  if (!moment(start).isBefore(moment().add('months', 2).endOf('month'))) {
-    console.log('currentCreate: bad start, too far in future', moment(start).format());
-    throw new Meteor.Error(403, "Unable to create a new current Meeting: invalid start date");
-  }
-
-  // setup data for insertion
-  var data = _.omit(meetingGroup, '_id', 'created', 'modified', 'dow', 'wom');
-  //data.name = data.name + ' (' + moment(start).format('dddd, MMMM Do YYYY, h:mm:ss a') + ')';
-  // assign start time of day
-  start = moment(start).hour(meetingGroup.todHour).minute(meetingGroup.todMin);
-  // assign start
-  data.start = moment(start).toDate();
-
-  // save Meeting
-  Meeting.insert(data);
-
-  return true;
-};
 
 /**
  * get a mtg record (findOne helper)
@@ -418,6 +347,99 @@ Meeting.setUserVotesOnTopic = function(mtg, userId, topicId, votesCast) {
 // -----------------------------------
 
 Meteor.methods({
+  /**
+   * create the "next" meeting according to rules
+   * NOTE: if we need to customize how often Meetings are created, we will need
+   * to change these rules
+   */
+  meetingCurrentCreate: function() {
+    // get the MeetingGroup Template for the Meeting
+    // TODO: make a MeetingGroup Collection w/ Rules and Defaults
+    var meetingGroup = {
+      /* defaults for meeting */
+      name: "KYOSS Meeting",
+      short: "Come and join us! We usually have between 15 and 30 Linux users, admins, and programmers show up. Good conversation and networking and, often, a great presentation or two.",
+      location: "LVL1 Hackerspace",
+      locationAddress: "The Pointe in Butchertown, 1205 E Washington Street; Louisville, KY 40206",
+      start: moment(start).toDate(),
+      duration: 120,
+      /* scheudling rules */
+      /* rules: "second Wednesday of the Month" */
+      wom: 2,      /* week of month: 1-5 */
+      dow: 3,      /* day of week: 0=Sun, 6=Sat */
+      todHour: 19, /* time of day: hour in 24hr format */
+      todMin: 00   /* time of day: minutes */
+    };
+
+    // get the last "start"
+    var last = Meeting.findOne(
+      {},
+      { sort: { start: 1 } }
+    );
+    if (!last || !last.start) {
+      var start = moment().startOf('month');
+    } else {
+      var start = moment(last.start).add(25, 'days');
+    }
+
+    // double-check to ensure we are not starting too far in the future
+    //   start should be either in last month, or in this month
+    if (parseFloat(moment.version) >= 2.7) {
+      start = moment.min(moment(start), moment().endOf('month'));
+    } else {
+      start = moment(start).max(moment().endOf('month'));
+    }
+
+    // incriment days until it matches rules
+    for (var i=0; i<35; i++) {
+      // current:
+      wom = Math.ceil(moment(start).date() / 7);
+      dow = moment(start).weekday();
+
+      // check
+      if (wom == meetingGroup.wom && dow == meetingGroup.dow) {
+        break;
+      }
+
+      // incriment
+      start = moment(start).add('day', 1);
+      console.log('currentCreate+1day:', moment(start).format());
+    }
+
+    console.log('currentCreate:result:', moment(start).format());
+
+    // double-check to ensure we are not starting too far in the future
+    //   start should be less than 2 months in the future
+    if (!moment(start).isBefore(moment().add('months', 2).endOf('month'))) {
+      console.log('currentCreate: bad start, too far in future', moment(start).format());
+      throw new Meteor.Error(403, "Unable to create a new current Meeting: invalid start date");
+    }
+
+    // setup data for insertion
+    var data = _.omit(meetingGroup, '_id', 'created', 'modified', 'dow', 'wom');
+    //data.name = data.name + ' (' + moment(start).format('dddd, MMMM Do YYYY, h:mm:ss a') + ')';
+    // assign start time of day
+    start = moment(start).hour(meetingGroup.todHour).minute(meetingGroup.todMin);
+    // assign start
+    data.start = moment(start).toDate();
+
+    // does this meeting already exist?
+    var exists = Meeting.findOne(
+      { start: {
+        $gte: moment(data.start).subtract(1, 'day').toDate(),
+        $lte: moment(data.start).add(1, 'day').toDate()
+      } },
+      { sort: { start: 1 } }
+    );
+    if (!exists || !exists.start) {
+
+      // save new Meeting (current)
+      Meeting.insert(data);
+    }
+
+    return true;
+  },
+
   /**
    * this meeting
    * - for a userId

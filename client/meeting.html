@@ -9,14 +9,7 @@
 </ol>
 
 <div class="well">
-  <dl class="dl-horizontal">
-    <dt>Your Votes Spent</dt>
-    <dd>{{votesSpent}}</dd>
-    {{#if isVoteable}}
-      <dt>Your Votes Left</dt>
-      <dd>{{votesLeft}}</dd>
-    {{/if}}
-  </dl>
+  {{> currentMeetingDL}}
 </div>
 
 {{#each topics}}

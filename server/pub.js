@@ -18,7 +18,32 @@ Meteor.publish('public', function () {
     Topic.find(
       // TODO: remove private
       { },
-      { fields: { desc: 0 } }
+      { fields: {
+        name: 1,
+        short: 1,
+        url: 1,
+        tags: 1,
+        locked: 1,
+        votesLife: 1,
+        votesCurrent: 1
+        /* not including:
+         *   - votes: too large
+         */
+      } }
+    )
+  ];
+});
+
+Meteor.publish('loggedin', function (userId) {
+  if (!this.userId) {
+    return [];
+  }
+  return [
+    Topic.find(
+      // TODO: remove private
+      { },
+      { fields: {
+      }}
     )
   ];
 });
